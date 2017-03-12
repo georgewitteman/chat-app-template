@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <title>My Chat App</title>
+</head>
+<body>
+
+  <h1>My Chat App</h1>
+
+  <!-- Chat history -->
+  <ol id="chat">
+  </ol>
+
+  <!-- Message form -->
+  <form id="messageForm">
+    <input id="message">
+    <input type="submit" value="Send">
+  </form>
+
+  <!--
+  The socket.io javascript library. We have to include this before
+  our javascript otherwise we wouldn't be able to use the functions
+  given to us in the socket.io library. -->
+  <script src="socket.io-1.7.3.js"></script>
+
+  <!-- Our javascript -->
+  <script>
+
+  // Wait until the page is finished loading to run any Javascript
+  document.addEventListener("DOMContentLoaded", function(event) {
+
+    // Create our socket.io connection to our server. No need to specify
+    // a url or port, because socket.io will default to the host that
+    // serves the current page
+    var socket = io();
+
+    // When we submit a new message, send that message to the server
+    var form = document.getElementById('messageForm');
+    form.addEventListener('submit', function(event) {
+
+      // By default the form will submit and try to reload the page.
+      // We must use event.preventDefault() to stop this page reload
+      // so that our javascript will execute.
+      event.preventDefault();
+
+      // Get the message from the DOM...
+      var message = document.getElementById('message')
+      // ...and send it to our Node.js app
+      socket.emit('chat message', message.value);
+
+      // Clear the message form
+      message.value = '';
+    });
+
+    // This code will listen for messages from the server.
+    // When the server informs us of a new message, it will
+    // update the HTML document with the message
+    socket.on('chat message', function(msg) {
+      var chat = document.getElementById('chat');
+      var incomingMessage = document.createElement("li");
+      incomingMessage.innerHTML = msg;
+      chat.appendChild(incomingMessage);
+    });
+
+  });
+  </script>
+</body>
+</html>
